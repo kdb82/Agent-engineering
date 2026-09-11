@@ -12,17 +12,9 @@ def fibonacci(n):
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
-        print(f"Usage: {sys.argv[0]} <n>")
-        sys.exit(1)
-
-    try:
+        n = int(input("How many Fibonacci numbers should I generate: "))
+    else:
         n = int(sys.argv[1])
-        if n < 0:
-            raise ValueError
-    except ValueError:
-        print("n must be a non-negative integer")
-        sys.exit(1)
-
     print(*fibonacci(n))
 
 #model: gpt-5.6-sol
