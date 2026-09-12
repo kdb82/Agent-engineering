@@ -22,7 +22,7 @@ def main(model, reasoning, prompt=None):
     request: dict = {
         "model": model,
         "input": prompt,
-        "instructions": "you can only respond to me in caveman language, if any code is written, syntax should be valid for that language.",
+        "instructions": "if any code is written, syntax should be valid for that language.",
     }
     if reasoning is not None:
         request["reasoning"] = reasoning
@@ -36,7 +36,7 @@ def main(model, reasoning, prompt=None):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser('AI Response')
     parser.add_argument('prompt_file', nargs='?', type=Path)
-    parser.add_argument('--model', default='gpt-4o-mini')
+    parser.add_argument('--model', default='gpt-5.6-luna')
     parser.add_argument('--reasoning', choices=('low', 'medium', 'high'), default='low')
     args = parser.parse_args()
     reasoning_models = {"gpt-5.6-luna", "gpt-5.6-terra", "gpt-5.4", "gpt-5.6-sol"}
