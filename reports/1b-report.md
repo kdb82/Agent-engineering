@@ -1,18 +1,15 @@
 # Homework 1B Report
 
 ## Required Tasks
+I controlled the summary format with detailed prompt instructions. The agent was asked to give a concise affirmation followed by a JSON code block containing key takeaways, messages important to the speaker, and a third category: the relationship to the Atonement of Jesus Christ. This produced a readable Markdown response and a structured JSON summary of a BYU devotional.
 
-I built a command-line agent with the OpenAI Responses API. The program loads its API key from a `.env` file, accepts a prompt file and model/reasoning command-line options, sends requests with `client.responses.create()`, and prints token usage and estimated cost at the end of a session.
-
-I expanded the program into a multi-turn agent. Each user message is appended to `history`, and the completed API response output is appended after each turn. Passing `history` through the `input` parameter lets the model use the earlier conversation as context.
-
-I also enabled streaming with `stream=True`. The program prints each `response.output_text.delta` event immediately, then saves the final response from the `response.completed` event for usage reporting and conversation history.
+I found that when asking for JSON the agent typically was pretty faithful in ensuring it's output was only JSON. Rarely did I get responses in other formats. When I didn't give clear examples and followed a "no-shot" prompting style, mileage definitely varied. Additionally, the newer models were much better at giving a thorough summary and giving examples from the text itself. Older models gave a more conceptual summary of the devotional.
 
 ## Additional Exploration
 
-I compared several models, including `gpt-4o-mini`, `gpt-4.1-nano`, `gpt-5.6-luna`, `gpt-5.6-terra`, and `gpt-5.6-sol`, using speech-summary prompts. I compared response quality, latency, token counts, caching, and reported cost.
+I compared several models, including `gpt-4o-mini`, `gpt-4.1-nano`, `gpt-5.6-luna`, `gpt-5.6-terra`, and `gpt-5.6-sol`, asking each of these to summarize my a BYU devotional using various prompt techniques (no-shot and multi-shot prompting). In particular, I compared `gpt-5.6-luna` and `gpt-5.6-sol`. For roughly 4,800 input tokens, Luna cost about $0.0013 and Sol cost about $0.03, making Sol roughly 20 to 25 times more expensive in these runs. Both created useful structured summaries, while Sol generally gave a more complete and polished response. Luna was a much better value when concise extraction was sufficient. I thought it was interesting that the older models followed my EXACT instructions and only provided json with fields exact to my prompt instructions. Newer models treated my JSON as a guideline but not a barrier.
 
-I explored shell redirection by running commands such as `python3 agent.py prompt3.md > output4.md`. I updated the agent so redirected output creates a transcript containing both `USER:` messages and streamed `AGENT:` responses. The code checks `sys.stdout.isatty()` so normal terminal use has one input prompt, while redirected use records complete user messages in the Markdown file.
+I explored shell redirection by running commands such as `python agent.py prompt3.md > output4.md`. I updated the agent so redirected output creates a transcript containing both `USER:` messages and streamed `AGENT:` responses.
 
 ## Obstacles
 
@@ -20,20 +17,14 @@ Initially, VS Code could not resolve the `dotenv` or `openai` imports. I install
 
 My first conversation-history attempt used a `history` argument with the Responses API, but that is not a supported parameter. I corrected it by passing the history list as `input`.
 
-My first streaming implementation called `stream.get_final_response()`, which caused an `AttributeError` because the installed SDK's `Stream` object does not provide that method. I corrected this by saving `event.response` when the stream emits `response.completed`.
-
-When I stopped the program with `Ctrl-C` while it was waiting for input, Python displayed a `KeyboardInterrupt` traceback. Ending a session with `exit` instead allows the `finally` block to print the usage summary cleanly.
-
 ## What I Learned
+I learned that streaming produces a sequence of typed events, so text can be displayed from delta events while the final response object is retained for metadata and future context.
 
-I learned the difference between standard input, standard output, and standard error, especially when output is redirected to a file. I also learned that streaming produces a sequence of typed events, so text can be displayed from delta events while the final response object is retained for metadata and future context.
-
-I learned that client-side conversation history must use the API's supported request shape. I also learned that a local virtual environment makes installed dependencies and editor analysis more reliable.
+I learned that client-side conversation history must use the API's supported request shape. Finally, I learned that prompt formatting can guide a model toward a valid JSON result, but a JSON Schema is needed when an application must guarantee a stable output contract.
 
 ## Relevance to Agent Engineering
 
-An agent is more than a single model call. It needs a reliable runtime environment, conversation state, incremental output, graceful session handling, observability through usage data, and reproducible artifacts such as transcripts. These experiments show how API details, terminal behavior, and context management directly affect an agent's usability and reliability.
-
+An agent is more than a single model call. It needs a reliable runtime environment, conversation state, structured output contracts, incremental output, graceful session handling, observability through usage data, and reproducible artifacts such as transcripts. These experiments show how these details can influence response quality. Additionally, fast prompt reproducibility makes it much easier to examine the boundaries of a given model.
 ## Time Spent
 
-Hours spent: **[enter your total hours here]**
+Hours spent: 3.0
