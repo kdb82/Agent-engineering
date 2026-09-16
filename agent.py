@@ -11,11 +11,9 @@ load_dotenv()
 
 def main(model, reasoning, prompt=None):
     start = time()
-    models_by_cost = ["gpt-4o-mini", "gpt-5.6-luna", "gpt-5.6-terra", "gpt-5.4", "gpt-5.6-sol", ]
+    # models_by_cost = ["gpt-4o-mini", "gpt-5.6-luna", "gpt-5.6-terra", "gpt-5.4", "gpt-5.6-sol", ]
     client = OpenAI()
 
-    if not model:
-        model = models_by_cost[-1]
     if not prompt:
         print("Prompt: ", end="", file=sys.stderr, flush=True)
         prompt = sys.stdin.readline().rstrip("\n")
@@ -37,7 +35,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser('AI Response')
     parser.add_argument('prompt_file', nargs='?', type=Path)
     parser.add_argument('--model', default='gpt-5.6-luna')
-    parser.add_argument('--reasoning', choices=('low', 'medium', 'high'), default='low')
+    parser.add_argument('--reasoning', choices=('none', 'minimal', 'low', 'medium', 'high', 'xhigh', 'max'), default='low')
     args = parser.parse_args()
     reasoning_models = {"gpt-5.6-luna", "gpt-5.6-terra", "gpt-5.4", "gpt-5.6-sol"}
     reasoning = {"effort": args.reasoning} if args.model in reasoning_models else None
