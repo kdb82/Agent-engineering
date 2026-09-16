@@ -10,26 +10,60 @@ from openai import OpenAI
 load_dotenv()
 
 def main(model, reasoning, prompt=None):
-    start = time()
     # models_by_cost = ["gpt-4o-mini", "gpt-5.6-luna", "gpt-5.6-terra", "gpt-5.4", "gpt-5.6-sol", ]
     client = OpenAI()
+    usage = []
+    # history = [{"role": "user", "content": prompt if prompt else "You are a helpful AI assistant."}]
+    history = []
+    usr_msg = prompt
+    writing_transcript = not sys.stdout.isatty()
 
-    if not prompt:
-        print("Prompt: ", end="", file=sys.stderr, flush=True)
-        prompt = sys.stdin.readline().rstrip("\n")
-    request: dict = {
-        "model": model,
-        "input": prompt,
-        "instructions": "if any code is written, syntax should be valid for that language.",
-    }
-    if reasoning is not None:
-        request["reasoning"] = reasoning
+    try:
+        while True:
+            if usr_msg is None:
+                if writing_transcript:
+                    print("USER: ", end="", file=sys.stderr, flush=True)
+                    usr_msg = sys.stdin.readline().rstrip("\n")
+                else:
+                    usr_msg = input("USER: ")
+            if usr_msg == "exit" or usr_msg == "":
+                break
 
-    response = client.responses.create(**request)
-    print('\n' + response.output_text + '\n')
+            if writing_transcript:
+                print(f"USER: {usr_msg}", flush=True)
+                
+            # create request object for the OpenAI API
+            history.append({"role": "user", "content": usr_msg})
+            start = time()
+            request: dict = {
+                "model": model,
+                "input": history,
+                "instructions": "if any code is written, syntax should be valid for that language.",
+                "reasoning": reasoning,
+                "stream": True,
+            }
 
-    print(f'{round(time()-start, 2)} seconds elapsed', file=sys.stderr)
-    print_usage([(model, response.usage)])
+            # Print response as it streams in
+            stream = client.responses.create(**request)
+            response = None
+            print("\nAGENT: ", end="", flush=True)
+            for event in stream:
+                if event.type == "response.output_text.delta":
+                    print(event.delta, end="", flush=True)
+                elif event.type == "response.completed":
+                    response = event.response
+
+            print()
+
+            if response is not None:
+                usage.append((model, response.usage))
+                history.extend(response.output)
+
+            print(f'{round(time()-start, 2)} seconds elapsed\n', file=sys.stderr)
+            usr_msg = None
+
+    finally:
+        print_usage(usage)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser('AI Response')
