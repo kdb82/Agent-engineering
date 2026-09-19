@@ -6,16 +6,24 @@ from time import time
 from usage import print_usage
 from openai import OpenAI
 
-
 load_dotenv()
 
 def main(model, reasoning, prompt=None):
     # models_by_cost = ["gpt-4o-mini", "gpt-5.6-luna", "gpt-5.6-terra", "gpt-5.4", "gpt-5.6-sol", ]
     client = OpenAI()
     usage = []
-    # history = [{"role": "user", "content": prompt if prompt else "You are a helpful AI assistant."}]
-    history = []
-    usr_msg = prompt
+    history = (
+        [{"role": "developer", "content": prompt}]
+        if prompt
+        else []
+    )
+    with open("agent_outputs/1c/test1.md", "r") as f:
+        history.append({"role": "developer", "content": f.read()})
+    with open("agent_outputs/1c/test2.md", "r") as f:
+        history.append({"role": "developer", "content": f.read()})
+    with open("agent_outputs/1c/test3.md", "r") as f:
+            history.append({"role": "developer", "content": f.read()})
+    usr_msg = None 
     writing_transcript = not sys.stdout.isatty()
 
     try:
