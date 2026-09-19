@@ -1,0 +1,14 @@
+# Homework 1d - report
+
+## BYU Devotional - Elder Bednar
+As I listened to Elder Bednar's devotional. I spent a lot of time thinking about how I use AI both personally and in when I'm at work. He focused the majority of his speech on how we are creators under God's plan. Agency is a key trait of the plan of happiness and God wants us to experience the joys of creation. With that in mind, technology can both aid and harm that endeavor. Specifically with AI, it is very easy to give all our work over to an agent and take no thought in exercising that right for ourselves. Additionally, outside of potential spiritual turmoil that AI can cause, there's a lot of external turmoil related to AI being ciruculated. There's real fear for a lot of people, both the educated and uneducated. Amidst all this fear, there's times I've forgotten myself to remember to fit these technologies within a greater more eternal perspective. Trusting that God is not going to inspire this technology to undo his plan will be important to feel peace as the world moves forward.
+
+All-in-all, I want to try to remember how I both use and support AI use. I never want to replace my relationships, and I don't want to support products that also aim to do the same.
+
+## AI and the powers of persuasion
+[Article Link](https://www.science.org/content/article/ai-chatbots-are-becoming-experts-changing-people-s-minds-what-s-their-secret?referrer=https%3A%2F%2Fwww.google.com%2F)
+
+This article summarized a number of studies showing how AI has gotten better at persuading people. There were multiple instances were AI was better at convincing people against their own political beliefs than humans were. The implications of this can be large. People may try to leverage this for both ethical, and unethical reasons. I think the article just shows how important it is to educate yourself on the strengths and weaknesses of AI (hallucinations) so that you can correctly make judgements on arguments that AI makes. One proposed cause that AI was so much better than humans was the overwhelming speed that AI can write and fact check arguments. Some researchers believed that shouldn't be a cause for concern because people should pick up on these logical fallacies, others were more concerned. This is still an unknown area for research as new people implement AI in their campaigning and platforms. 
+
+## Relation to Agent Engineering
+Overall, I believe that I do need to put guidelines in place for how I use AI. Some people are debating whether nationwide guidelines need to be set. Either way, I think it's wise to keep the consequences and benefits in mind when interacting with the technology. Both in a secular and a spiritual sense. It's inappropriate to substitute our agency and relationships with AI, and instead we should focus on expanding our creative potential (without relenquishing it). 
