@@ -1,4 +1,4 @@
-USER: solve
+Note: this is after I asked the agent to solve the same puzzle in logic_prompt2.md. This time I did it on xhigh reasoning. It was able to get the right answer.
 
 AGENT: ## Solution
 
