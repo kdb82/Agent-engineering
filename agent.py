@@ -8,24 +8,8 @@ from openai import OpenAI
 
 load_dotenv()
 
-def main(model, reasoning, prompt=None):
-    # models_by_cost = ["gpt-4o-mini", "gpt-5.6-luna", "gpt-5.6-terra", "gpt-5.4", "gpt-5.6-sol", ]
-    client = OpenAI()
-    usage = []
-    history = (
-        [{"role": "developer", "content": prompt}]
-        if prompt
-        else []
-    )
-    with open("agent_outputs/1c/test1.md", "r") as f:
-        history.append({"role": "developer", "content": f.read()})
-    with open("agent_outputs/1c/test2.md", "r") as f:
-        history.append({"role": "developer", "content": f.read()})
-    with open("agent_outputs/1c/test3.md", "r") as f:
-            history.append({"role": "developer", "content": f.read()})
-    usr_msg = None 
-    writing_transcript = not sys.stdout.isatty()
-
+def loop(client, model, reasoning, history, usage, writing_transcript):
+    usr_msg = None
     try:
         while True:
             if usr_msg is None:
@@ -39,7 +23,7 @@ def main(model, reasoning, prompt=None):
 
             if writing_transcript:
                 print(f"USER: {usr_msg}", flush=True)
-                
+
             # create request object for the OpenAI API
             history.append({"role": "user", "content": usr_msg})
             start = time()
@@ -69,9 +53,21 @@ def main(model, reasoning, prompt=None):
 
             print(f'{round(time()-start, 2)} seconds elapsed\n', file=sys.stderr)
             usr_msg = None
-
     finally:
         print_usage(usage)
+
+def main(model, reasoning, prompt=None):
+    # models_by_cost = ["gpt-4o-mini", "gpt-5.6-luna", "gpt-5.6-terra", "gpt-5.4", "gpt-5.6-sol", ]
+    client = OpenAI()
+    usage = []
+    history = (
+        [{"role": "developer", "content": prompt}]
+        if prompt
+        else []
+    )
+    writing_transcript = not sys.stdout.isatty()
+
+    loop(client, model, reasoning, history, usage, writing_transcript)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser('AI Response')

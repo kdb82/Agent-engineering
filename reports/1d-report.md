@@ -12,3 +12,6 @@ This article summarized a number of studies showing how AI has gotten better at 
 
 ## Relation to Agent Engineering
 Overall, I believe that I do need to put guidelines in place for how I use AI. Some people are debating whether nationwide guidelines need to be set. Either way, I think it's wise to keep the consequences and benefits in mind when interacting with the technology. Both in a secular and a spiritual sense. It's inappropriate to substitute our agency and relationships with AI, and instead we should focus on expanding our creative potential (without relenquishing it). 
+
+## Time spent (researching, writing, and brainstorming)
+3.0 hours
