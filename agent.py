@@ -30,7 +30,7 @@ def loop(client, model, reasoning, history, usage, writing_transcript):
             request: dict = {
                 "model": model,
                 "input": history,
-                "instructions": "if any code is written, syntax should be valid for that language.",
+                "instructions": "if any code is written, syntax should be valid for that language. All responses should be valid markdown syntax.",
                 "reasoning": reasoning,
                 "stream": True,
             }
