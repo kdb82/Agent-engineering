@@ -7,8 +7,16 @@ from usage import print_usage
 from openai import OpenAI
 from tools import ToolBox
 import json
+import random
 
 load_dotenv()
+
+toolbox = ToolBox()
+
+@toolbox.tool
+def random_int(low: int, high: int) -> int:
+    """Return a random integer in [low, high] inclusive."""
+    return random.randint(low, high)
 
 def run_turn(client, model, reasoning, history, usage, toolbox, instructions):
     while True:
@@ -83,7 +91,6 @@ def main(model, reasoning, prompt=None):
         else []
     )
     writing_transcript = not sys.stdout.isatty()
-    toolbox = ToolBox()
 
     loop(client, model, reasoning, history, usage, writing_transcript, toolbox)
 
