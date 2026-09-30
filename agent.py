@@ -5,54 +5,71 @@ from pathlib import Path
 from time import time
 from usage import print_usage
 from openai import OpenAI
+from tools import ToolBox
+import json
 
 load_dotenv()
 
-def loop(client, model, reasoning, history, usage, writing_transcript):
-    usr_msg = None
+def run_turn(client, model, reasoning, history, usage, toolbox, instructions):
+    while True:
+        stream = client.responses.create(
+            model=model,
+            input=history,
+            instructions=instructions,
+            reasoning=reasoning,
+            tools=toolbox.tools,
+            stream=True,
+        )
+        response = None
+        for event in stream:
+            if event.type == "response.output_text.delta":
+                print(event.delta, end="", flush=True)
+            elif event.type == "response.completed":
+                response = event.response
+        if response is None:
+            return
+
+        usage.append((model, response.usage))
+        history.extend(response.output)
+
+        calls = [item for item in response.output if item.type == "function_call"]
+        if not calls:
+            print()
+            return
+        for call in calls:
+            func = toolbox.get_tool_function(call.name)
+            try:
+                result = func(**json.loads(call.arguments)) if func else f"Unknown tool {call.name}"
+            except Exception as e:
+                result = f"Error: {e}"
+            print(f"\n[tool] {call.name}({call.arguments})", file=sys.stderr)
+            history.append({
+                "type": "function_call_output",
+                "call_id": call.call_id,
+                "output": str(result),
+            })
+
+INSTRUCTIONS = "if any code is written, syntax should be valid for that language. All responses should be valid markdown syntax."
+
+def loop(client, model, reasoning, history, usage, writing_transcript, toolbox):
     try:
         while True:
-            if usr_msg is None:
-                if writing_transcript:
-                    print("USER: ", end="", file=sys.stderr, flush=True)
-                    usr_msg = sys.stdin.readline().rstrip("\n")
-                else:
-                    usr_msg = input("USER: ")
+            if writing_transcript:
+                print("USER: ", end="", file=sys.stderr, flush=True)
+                usr_msg = sys.stdin.readline().rstrip("\n")
+            else:
+                usr_msg = input("USER: ")
             if usr_msg == "exit" or usr_msg == "":
                 break
 
             if writing_transcript:
                 print(f"USER: {usr_msg}", flush=True)
 
-            # create request object for the OpenAI API
             history.append({"role": "user", "content": usr_msg})
             start = time()
-            request: dict = {
-                "model": model,
-                "input": history,
-                "instructions": "if any code is written, syntax should be valid for that language. All responses should be valid markdown syntax.",
-                "reasoning": reasoning,
-                "stream": True,
-            }
-
-            # Print response as it streams in
-            stream = client.responses.create(**request)
-            response = None
             print("\nAGENT: ", end="", flush=True)
-            for event in stream:
-                if event.type == "response.output_text.delta":
-                    print(event.delta, end="", flush=True)
-                elif event.type == "response.completed":
-                    response = event.response
-
-            print()
-
-            if response is not None:
-                usage.append((model, response.usage))
-                history.extend(response.output)
-
+            run_turn(client, model, reasoning, history, usage, toolbox, INSTRUCTIONS)
             print(f'{round(time()-start, 2)} seconds elapsed\n', file=sys.stderr)
-            usr_msg = None
     finally:
         print_usage(usage)
 
@@ -66,8 +83,9 @@ def main(model, reasoning, prompt=None):
         else []
     )
     writing_transcript = not sys.stdout.isatty()
+    toolbox = ToolBox()
 
-    loop(client, model, reasoning, history, usage, writing_transcript)
+    loop(client, model, reasoning, history, usage, writing_transcript, toolbox)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser('AI Response')
