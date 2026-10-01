@@ -8,6 +8,8 @@ from openai import OpenAI
 from tools import ToolBox
 import json
 import random
+import requests
+from bs4 import BeautifulSoup
 
 load_dotenv()
 
@@ -17,6 +19,23 @@ toolbox = ToolBox()
 def random_int(low: int, high: int) -> int:
     """Return a random integer in [low, high] inclusive."""
     return random.randint(low, high)
+
+@toolbox.tool
+def fetch_url(url: str) -> str:
+    """Fetch a web page and return its text."""
+    html = requests.get(url, timeout=15).content
+    return BeautifulSoup(html, "html.parser").get_text("\n", strip=True)[:40_000]
+
+@toolbox.tool
+def get_conference_index() -> str:
+    """List the talks (title | speaker -> URL) from the most recent General Conference."""
+    html = requests.get("https://www.churchofjesuschrist.org/study/general-conference/2026/04?lang=eng", timeout=15).content
+    links = BeautifulSoup(html, "html.parser").find_all("a", href=True)
+    return "\n".join(
+        f"{a.get_text(' | ', strip=True)} -> https://www.churchofjesuschrist.org{a['href']}"
+        for a in links
+        if "/general-conference/2026/04/" in a["href"]
+    )
 
 def run_turn(client, model, reasoning, history, usage, toolbox, instructions):
     while True:
