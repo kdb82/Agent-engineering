@@ -97,7 +97,7 @@ def run_turn(client, model, reasoning, history, usage, toolbox, instructions):
                 "output": str(result),
             })
 
-INSTRUCTIONS = "if any code is written, syntax should be valid for that language. All responses should be valid markdown syntax."
+INSTRUCTIONS = "if any code is written, syntax should be valid for that language. All responses should be valid markdown syntax otherwise."
 
 def loop(client, model, reasoning, history, usage, writing_transcript, toolbox):
     try:
