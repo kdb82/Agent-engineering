@@ -7,35 +7,56 @@ from usage import print_usage
 from openai import OpenAI
 from tools import ToolBox
 import json
-import random
-import requests
-from bs4 import BeautifulSoup
+import subprocess
 
 load_dotenv()
 
 toolbox = ToolBox()
 
 @toolbox.tool
-def random_int(low: int, high: int) -> int:
-    """Return a random integer in [low, high] inclusive."""
-    return random.randint(low, high)
+def bash(command: str) -> str:
+    """Run a bash command and return its output and exit status."""
+    try:
+        completed = subprocess.run(
+            ["bash", "-lc", command],
+            capture_output=True,
+            text=True,
+            timeout = 30
+        )
+
+    except subprocess.TimeoutExpired as error:
+        return f"Error: {error}"
+
+    output = completed.stdout + completed.stderr
+    if completed.returncode:
+        output += f"\n[exit code: {completed.returncode}]"
+    return output
 
 @toolbox.tool
-def fetch_url(url: str) -> str:
-    """Fetch a web page and return its text."""
-    html = requests.get(url, timeout=15).content
-    return BeautifulSoup(html, "html.parser").get_text("\n", strip=True)[:40_000]
+def read(path: str) -> str:
+    """Read a UTF-8 text file and return its contents."""
+    return Path(path).expanduser().read_text(encoding="utf-8")
 
 @toolbox.tool
-def get_conference_index() -> str:
-    """List the talks (title | speaker -> URL) from the most recent General Conference."""
-    html = requests.get("https://www.churchofjesuschrist.org/study/general-conference/2026/04?lang=eng", timeout=15).content
-    links = BeautifulSoup(html, "html.parser").find_all("a", href=True)
-    return "\n".join(
-        f"{a.get_text(' | ', strip=True)} -> https://www.churchofjesuschrist.org{a['href']}"
-        for a in links
-        if "/general-conference/2026/04/" in a["href"]
-    )
+def write(path: str, content: str) -> str:
+    """Write UTF-8 text to a file, creating parent directories as needed."""
+    file_path = Path(path).expanduser()
+    file_path.parent.mkdir(parents=True, exist_ok=True)
+    file_path.write_text(content, encoding="utf-8")
+    return f"Wrote {len(content)} characters to {file_path}"
+
+@toolbox.tool
+def edit(path: str, old_text: str, new_text: str) -> str:
+    """Replace exactly one matching text block in a UTF-8 file."""
+    file_path = Path(path).expanduser()
+    content = file_path.read_text(encoding="utf-8")
+    matches = content.count(old_text)
+    if matches == 0:
+        raise ValueError(f"Text to replace was not found in {file_path}")
+    if matches > 1:
+        raise ValueError(f"Text to replace occurs {matches} times in {file_path}; include more context")
+    file_path.write_text(content.replace(old_text, new_text, 1), encoding="utf-8")
+    return f"Edited {file_path}"
 
 def run_turn(client, model, reasoning, history, usage, toolbox, instructions):
     while True:
@@ -69,7 +90,7 @@ def run_turn(client, model, reasoning, history, usage, toolbox, instructions):
                 result = func(**json.loads(call.arguments)) if func else f"Unknown tool {call.name}"
             except Exception as e:
                 result = f"Error: {e}"
-            print(f"\n[tool] {call.name}({call.arguments})", file=sys.stderr)
+            print(f"\ntool: {call.name}({call.arguments})", file=sys.stderr)
             history.append({
                 "type": "function_call_output",
                 "call_id": call.call_id,
